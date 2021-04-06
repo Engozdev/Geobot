@@ -28,6 +28,17 @@ def game_choice(update, context):
         return ConversationHandler.END
     context.user_data['game'] = ans
     update.message.reply_text("Теперь выбери континент:", reply_markup=continent_markup)
+    return 2
+
+
+def continent_choice(update, context):
+    ans = update.message.text
+    if ans.lower() not in ['europe', 'asia', 'africa', 'south america', 'northern america']:
+        update.message.reply_text("Неправильные данные, начинай заново",
+                                  reply_markup=ReplyKeyboardRemove())
+        return ConversationHandler.END
+    context.user_data['continent'] = ans
+    update.message.reply_text("Выбери уровень сложности:", reply_markup=difficulty_markup)
     return ConversationHandler.END
 
 
