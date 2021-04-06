@@ -5,6 +5,7 @@ from telegram.ext import CommandHandler
 from telegram import ReplyKeyboardMarkup
 from telegram import ReplyKeyboardRemove
 from telegram.ext import ConversationHandler
+import os
 
 TOKEN = "TOKEN"
 
@@ -55,6 +56,25 @@ def diff_choice(update, context):
         return "Flags1"
     elif f.lower() == 'borders':
         return "Borders1"
+
+
+def flag_quiz_1(update, context):
+    src = list()
+    f_dir = context.user_data["game"].capitalize()
+    s_dir = context.user_data["continent"].capitalize()
+    t_dir = context.user_data["difficulty"].capitalize()
+    path = f'data/{f_dir}/{s_dir}/{t_dir}'
+    for currentdir, dirs, files in os.walk(path):
+        src = files
+    path_to_photo = path + '/' + src[2]
+    context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(path_to_photo, mode='rb'))
+    path += '/akeyboards.txt'
+    with open(path, mode='r', encoding='utf-8') as file:
+        keys = file.readlines()[0].strip().split(', ')
+        ans_key = [[keys[0], keys[1]], [keys[2], keys[3]]]
+        ans_mark = ReplyKeyboardMarkup(ans_key, one_time_keyboard=False)
+    update.message.reply_text("Какой стране принадлежит этот флаг?", reply_markup=ans_mark)
+    return 'Flags2'
 
 
 def stop(update, context):
