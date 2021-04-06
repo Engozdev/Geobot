@@ -375,6 +375,17 @@ if __name__ == '__main__':
             1: [MessageHandler(Filters.text & ~Filters.command, game_choice, pass_user_data=True)],
             2: [MessageHandler(Filters.text & ~Filters.command, continent_choice, pass_user_data=True)],
             3: [MessageHandler(Filters.text & ~Filters.command, diff_choice, pass_user_data=True)],
+            # flags cases
+            "Flags1": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_1, pass_user_data=True)],
+            "Flags2": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_2, pass_user_data=True)],
+            "Flags3": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_3, pass_user_data=True)],
+            "Flags4": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_4, pass_user_data=True)],
+            "Flags5": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_5, pass_user_data=True)],
+            "Flags6": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_6, pass_user_data=True)],
+            "Flags7": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_7, pass_user_data=True)],
+            "Flags8": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_8, pass_user_data=True)],
+            "Flags9": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_9, pass_user_data=True)],
+            "Flags10": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_10, pass_user_data=True)]
         },
         fallbacks=[MessageHandler(Filters.command, stop)]
     )
