@@ -102,7 +102,11 @@ if __name__ == '__main__':
         entry_points=[CommandHandler('start', start)],
         # Точка прерывания диалога. В данном случае — команда /stop.
         # Вариант с двумя обработчиками, фильтрующими текстовые сообщения.
-        states={},
+        states={
+            1: [MessageHandler(Filters.text & ~Filters.command, game_choice, pass_user_data=True)],
+            2: [MessageHandler(Filters.text & ~Filters.command, continent_choice, pass_user_data=True)],
+            3: [MessageHandler(Filters.text & ~Filters.command, diff_choice, pass_user_data=True)],
+        },
         fallbacks=[MessageHandler(Filters.command, stop)]
     )
     dp.add_handler(conv_handler)
