@@ -24,6 +24,12 @@ def stop(update, context):
     return ConversationHandler.END
 
 
+def helper(update, context):
+    update.message.reply_text(
+        "Я - географический бот. Провожу викторины оп географии. Чтобы пройти викторину, нажми /start",
+        reply_markup=help_markup)
+
+
 # Запускаем функцию main() в случае запуска скрипта.
 if __name__ == '__main__':
     continent_keyboard = [['Europe', 'Asia', 'Africa'], ['South America', 'Northern America']]
@@ -63,6 +69,7 @@ if __name__ == '__main__':
     )
     dp.add_handler(conv_handler)
     dp.add_handler(CommandHandler('start', start))
+    dp.add_handler(CommandHandler('help', helper))
     # Регистрируем обработчик в диспетчере.
     # Запускаем цикл приема и обработки сообщений.
     updater.start_polling()
