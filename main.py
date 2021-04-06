@@ -42,6 +42,21 @@ def continent_choice(update, context):
     return ConversationHandler.END
 
 
+def diff_choice(update, context):
+    ans = update.message.text
+    if ans.lower() not in ['easy', 'medium', 'hard']:
+        update.message.reply_text("Неправильные данные, начинай заново",
+                                  reply_markup=ReplyKeyboardRemove())
+        return ConversationHandler.END
+    context.user_data['difficulty'] = ans
+    f = context.user_data["game"].lower()
+    update.message.reply_text("Нажмите Начать, чтобы приступить к викторине", reply_markup=beginning_markup)
+    if f.lower() == 'flags':
+        return "Flags1"
+    elif f.lower() == 'borders':
+        return "Borders1"
+
+
 def stop(update, context):
     update.message.reply_text("Извините за беспокойство, до свидания")
     return ConversationHandler.END
