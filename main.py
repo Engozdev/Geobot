@@ -1,20 +1,27 @@
 from telegram.ext import Updater
 from telegram.ext import MessageHandler
 from telegram.ext import Filters
+from telegram.ext import CommandHandler
 from telegram import ReplyKeyboardMarkup
+from telegram.ext import ConversationHandler
 
 TOKEN = "TOKEN"
 
 
 # Определяем функцию-обработчик сообщений.
 # У неё два параметра, сам бот и класс updater, принявший сообщение.
-def echo(update, context):
+def start(update, context):
     # У объекта класса Updater есть поле message,
     # являющееся объектом сообщения.
     # У message есть поле text, содержащее текст полученного сообщения,
     # а также метод reply_text(str),
     # отсылающий ответ пользователю, от которого получено сообщение.
     update.message.reply_text(update.message.text)
+
+
+def stop(update, context):
+    update.message.reply_text("Извините за беспокойство, до свидания")
+    return ConversationHandler.END
 
 
 # Запускаем функцию main() в случае запуска скрипта.
@@ -45,10 +52,18 @@ if __name__ == '__main__':
     # После регистрации обработчика в диспетчере
     # эта функция будет вызываться при получении сообщения
     # с типом "текст", т. е. текстовых сообщений.
-    text_handler = MessageHandler(Filters.text, echo)
-
+    conv_handler = ConversationHandler(
+        # Точка входа в диалог.
+        # В данном случае — команда /start. Она задаёт первый вопрос.
+        entry_points=[CommandHandler('start', start)],
+        # Точка прерывания диалога. В данном случае — команда /stop.
+        # Вариант с двумя обработчиками, фильтрующими текстовые сообщения.
+        states={},
+        fallbacks=[MessageHandler(Filters.command, stop)]
+    )
+    dp.add_handler(conv_handler)
+    dp.add_handler(CommandHandler('start', start))
     # Регистрируем обработчик в диспетчере.
-    dp.add_handler(text_handler)
     # Запускаем цикл приема и обработки сообщений.
     updater.start_polling()
 
