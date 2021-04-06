@@ -3,6 +3,7 @@ from telegram.ext import MessageHandler
 from telegram.ext import Filters
 from telegram.ext import CommandHandler
 from telegram import ReplyKeyboardMarkup
+from telegram import ReplyKeyboardRemove
 from telegram.ext import ConversationHandler
 
 TOKEN = "TOKEN"
@@ -10,13 +11,22 @@ TOKEN = "TOKEN"
 
 # Определяем функцию-обработчик сообщений.
 # У неё два параметра, сам бот и класс updater, принявший сообщение.
+
+
 def start(update, context):
-    # У объекта класса Updater есть поле message,
-    # являющееся объектом сообщения.
-    # У message есть поле text, содержащее текст полученного сообщения,
-    # а также метод reply_text(str),
-    # отсылающий ответ пользователю, от которого получено сообщение.
-    update.message.reply_text(update.message.text)
+    s = "Привет, я бот-географ. Я люблю проводить викторину, географические конечно.\nДавай сыграем! Выбери викторину:"
+    update.message.reply_text(
+        s,
+        reply_markup=start_game_markup
+    )
+    return 1
+
+
+def game_choice(update, context):
+    ans = update.message.text
+    context.user_data['game'] = ans
+    update.message.reply_text("Теперь выбери континент:", reply_markup=continent_markup)
+    return ConversationHandler.END
 
 
 def stop(update, context):
