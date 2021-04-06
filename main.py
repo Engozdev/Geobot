@@ -1,6 +1,9 @@
 from telegram.ext import Updater
 from telegram.ext import MessageHandler
 from telegram.ext import Filters
+from telegram import ReplyKeyboardMarkup
+
+TOKEN = "TOKEN"
 
 
 # Определяем функцию-обработчик сообщений.
@@ -16,6 +19,20 @@ def echo(update, context):
 
 # Запускаем функцию main() в случае запуска скрипта.
 if __name__ == '__main__':
+    continent_keyboard = [['Europe', 'Asia', 'Africa'], ['South America', 'Northern America']]
+    continent_markup = ReplyKeyboardMarkup(continent_keyboard, one_time_keyboard=False)
+
+    start_game_keyboard = [['Flags', 'Capitals', 'Borders']]
+    start_game_markup = ReplyKeyboardMarkup(start_game_keyboard, one_time_keyboard=False)
+
+    difficulty_keyboard = [['Easy', 'Medium', 'Hard']]
+    difficulty_markup = ReplyKeyboardMarkup(difficulty_keyboard, one_time_keyboard=False)
+
+    beginning_keyboard = [['Начать']]
+    beginning_markup = ReplyKeyboardMarkup(beginning_keyboard, one_time_keyboard=False)
+
+    help_keyboard = [['/start']]
+    help_markup = ReplyKeyboardMarkup(help_keyboard, one_time_keyboard=False)
     # Создаём объект updater.
     # Вместо слова "TOKEN" надо разместить полученный от @BotFather токен
     updater = Updater(TOKEN, use_context=True)
