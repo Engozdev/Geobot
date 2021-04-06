@@ -16,14 +16,16 @@ TOKEN = "TOKEN"
 def start(update, context):
     s = "Привет, я бот-географ. Я люблю проводить викторину, географические конечно.\nДавай сыграем! Выбери викторину:"
     update.message.reply_text(
-        s,
-        reply_markup=start_game_markup
-    )
+        s, reply_markup=start_game_markup)
     return 1
 
 
 def game_choice(update, context):
     ans = update.message.text
+    if ans.lower() not in ['flags', 'capitals', 'borders']:
+        update.message.reply_text("Неправильные данные, начинай заново",
+                                  reply_markup=ReplyKeyboardRemove())
+        return ConversationHandler.END
     context.user_data['game'] = ans
     update.message.reply_text("Теперь выбери континент:", reply_markup=continent_markup)
     return ConversationHandler.END
