@@ -326,6 +326,30 @@ def flag_quiz_10(update, context):
         print(ex)
 
 
+def check_results(update, context):
+    global user_answers
+    user_ans = update.message.text.lower()
+    user_answers.append(user_ans)
+    f_dir = context.user_data["game"].capitalize()
+    s_dir = context.user_data["continent"].capitalize()
+    t_dir = context.user_data["difficulty"].capitalize()
+    path = f'data/{f_dir}/{s_dir}/{t_dir}/ans.txt'
+    with open(path, mode='r', encoding='utf-8') as f:
+        data = f.readlines()
+        user_result = 0
+        for i in range(len(data)):
+            if data[i].strip() == user_answers[i].strip():
+                user_result += 1
+        if user_result == 10:
+            update.message.reply_text(f"Wow, да ты географический гений! 10 из 10! Продолжай в том же духе!",
+                                      reply_markup=help_markup)
+        else:
+            update.message.reply_text(f"Твой результат: {user_result} из 10. Неплохо, но ты можешь лучше",
+                                      reply_markup=help_markup)
+    # return "SaveResults"
+    return ConversationHandler.END
+
+
 def stop(update, context):
     update.message.reply_text("Извините за беспокойство, до свидания")
     return ConversationHandler.END
