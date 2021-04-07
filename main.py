@@ -6,6 +6,7 @@ from telegram import ReplyKeyboardMarkup
 from telegram import ReplyKeyboardRemove
 from telegram.ext import ConversationHandler
 import os
+import sqlite3
 
 TOKEN = "TOKEN"
 user_answers = list()
@@ -350,6 +351,18 @@ def check_results(update, context):
     return ConversationHandler.END
 
 
+def save_results(update, context):
+    # Подключение к БД
+    con = sqlite3.connect("achievement.sqlite")
+
+    # Создание курсора
+    cur = con.cursor()
+
+    # Выполнение запроса и получение всех результатов
+    result = cur.execute("""SELECT * FROM progress""").fetchall()
+    print(result)
+
+
 def stop(update, context):
     update.message.reply_text("Извините за беспокойство, до свидания")
     return ConversationHandler.END
@@ -409,7 +422,9 @@ if __name__ == '__main__':
             "Flags7": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_7, pass_user_data=True)],
             "Flags8": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_8, pass_user_data=True)],
             "Flags9": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_9, pass_user_data=True)],
-            "Flags10": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_10, pass_user_data=True)]
+            "Flags10": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_10, pass_user_data=True)],
+            "Checkpoint": [MessageHandler(Filters.text & ~Filters.command, check_results, pass_user_data=True)],
+            "SaveResults": [MessageHandler(Filters.text & ~Filters.command, save_results, pass_user_data=True)]
         },
         fallbacks=[MessageHandler(Filters.command, stop)]
     )
