@@ -8,7 +8,7 @@ from telegram.ext import ConversationHandler
 import os
 import sqlite3
 
-TOKEN = "TOKEN"
+TOKEN = "1629030108:AAFm4QIJw56pm0VXh5sLvu_3hcVQqioQyss"
 user_answers = list()
 
 
@@ -42,7 +42,7 @@ def continent_choice(update, context):
         return ConversationHandler.END
     context.user_data['continent'] = ans
     update.message.reply_text("Выбери уровень сложности:", reply_markup=difficulty_markup)
-    return ConversationHandler.END
+    return 3
 
 
 def diff_choice(update, context):
@@ -320,7 +320,7 @@ def flag_quiz_10(update, context):
         ans_key = [[keys[0], keys[1]], [keys[2], keys[3]]]
         ans_mark = ReplyKeyboardMarkup(ans_key, one_time_keyboard=False)
         update.message.reply_text("Какой стране принадлежит этот флаг?", reply_markup=ans_mark)
-        return ConversationHandler.END
+        return "Checkpoint"
     except Exception as ex:
         update.message.reply_text("Извини, что-то пошло не так, но мы уже работаем над проблемой.",
                                   reply_markup=help_markup)
@@ -347,19 +347,25 @@ def check_results(update, context):
         else:
             update.message.reply_text(f"Твой результат: {user_result} из 10. Неплохо, но ты можешь лучше",
                                       reply_markup=help_markup)
-    # return "SaveResults"
-    return ConversationHandler.END
+    return "SaveResults"
+    # return ConversationHandler.END
 
 
 def save_results(update, context):
     # Подключение к БД
-    con = sqlite3.connect("achievement.sqlite")
-
+    con = sqlite3.connect("Achievement.sqlite")
     # Создание курсора
     cur = con.cursor()
-
     # Выполнение запроса и получение всех результатов
-    result = cur.execute("""SELECT * FROM progress""").fetchall()
+    request = f"""SELECT * FROM progress
+WHERE id = {update.message.chat_id}"""
+    result = cur.execute(request).fetchall()
+    if not request:
+        print('Empty')
+    else:
+        cur.execute(
+            f"""INSERT INTO process VALUES ({update.message.chat_id}, {context.user_data["game"]}, {context.user_data["continent"]}, {context.user_data["difficulty"]})""")
+        result = cur.execute(request).fetchall()
     print(result)
 
 
@@ -379,7 +385,7 @@ if __name__ == '__main__':
     continent_keyboard = [['Europe', 'Asia', 'Africa'], ['South America', 'Northern America']]
     continent_markup = ReplyKeyboardMarkup(continent_keyboard, one_time_keyboard=False)
 
-    start_game_keyboard = [['Flags', 'Capitals', 'Borders']]
+    start_game_keyboard = [['Flags', 'Borders']]
     start_game_markup = ReplyKeyboardMarkup(start_game_keyboard, one_time_keyboard=False)
 
     difficulty_keyboard = [['Easy', 'Medium', 'Hard']]
