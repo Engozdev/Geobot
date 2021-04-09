@@ -9,6 +9,7 @@ import os
 import sqlite3
 
 TOKEN = "1629030108:AAFm4QIJw56pm0VXh5sLvu_3hcVQqioQyss"
+LOGIN = False
 user_answers = list()
 
 
@@ -347,8 +348,10 @@ def check_results(update, context):
         else:
             update.message.reply_text(f"Твой результат: {user_result} из 10. Неплохо, но ты можешь лучше",
                                       reply_markup=help_markup)
-    return "SaveResults"
-    # return ConversationHandler.END
+    if LOGIN:
+        return "SaveResults"
+    else:
+        return ConversationHandler.END
 
 
 def save_results(update, context):
@@ -370,8 +373,43 @@ WHERE id = {update.message.chat_id}"""
 
 
 def stop(update, context):
-    update.message.reply_text("Извините за беспокойство, до свидания")
+    update.message.reply_text("Извините за беспокойство, до свидания", reply_markup=help_markup)
     return ConversationHandler.END
+
+
+def login(update, context):
+    global LOGIN
+    LOGIN = True
+    update.message.reply_text(
+        "Супер, теперь твои результаты будут записываться, и ты сможешь узнать их, введя команду /info")
+
+    # Подключение к БД
+    con = sqlite3.connect("Achievement.sqlite")
+    # Создание курсора
+    cur = con.cursor()
+    # Выполнение запроса и получение всех результатов
+    x = str(update.message.chat_id)
+    req = f"""INSERT INTO progress VALUES ({x}, 'Flags', 'Europe', 'Easy', 0), ({x}, 'Flags', 'Europe', 'Medium', 0), ({x}, 'Flags', 'Europe', 'Hard', 0), 
+({x}, 'Flags', 'Asia', 'Easy', 0), ({x}, 'Flags', 'Asia', 'Medium', 0), ({x}, 'Flags', 'Asia', 'Hard', 0), 
+({x}, 'Flags', 'Africa', 'Easy', 0), ({x}, 'Flags', 'Africa', 'Medium', 0), ({x}, 'Flags', 'Africa', 'Hard', 0), 
+({x}, 'Flags', 'South America', 'Easy', 0), ({x}, 'Flags', 'South America', 'Medium', 0), ({x}, 'Flags', 'South America', 'Hard', 0), 
+({x}, 'Flags', 'Northern America', 'Easy', 0), ({x}, 'Flags', 'Northern America', 'Medium', 0), ({x}, 'Flags', 'Northern America', 'Hard', 0)"""
+    cur.execute(req)
+
+    req = f"""SELECT * FROM progress"""
+    res = cur.execute(req).fetchall()
+    # for r in res:
+    #     print(r)
+    show()
+
+
+def show():
+    con = sqlite3.connect("Achievement.sqlite")
+    cur = con.cursor()
+    cur.execute("""INSERT INTO progress VALUES ("56565664", )""")
+    req = """SELECT * FROM progress"""
+    res = cur.execute(req).fetchall()
+    print(res)
 
 
 def helper(update, context):
@@ -437,6 +475,7 @@ if __name__ == '__main__':
     dp.add_handler(conv_handler)
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('help', helper))
+    dp.add_handler(CommandHandler('login', login))
     # Регистрируем обработчик в диспетчере.
     # Запускаем цикл приема и обработки сообщений.
     updater.start_polling()
