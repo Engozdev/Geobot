@@ -360,16 +360,7 @@ def save_results(update, context):
     # Создание курсора
     cur = con.cursor()
     # Выполнение запроса и получение всех результатов
-    request = f"""SELECT * FROM progress
-WHERE id = {update.message.chat_id}"""
-    result = cur.execute(request).fetchall()
-    if not request:
-        print('Empty')
-    else:
-        cur.execute(
-            f"""INSERT INTO process VALUES ({update.message.chat_id}, {context.user_data["game"]}, {context.user_data["continent"]}, {context.user_data["difficulty"]})""")
-        result = cur.execute(request).fetchall()
-    print(result)
+    # TODO: updating user's results
 
 
 def stop(update, context):
@@ -379,9 +370,12 @@ def stop(update, context):
 
 def login(update, context):
     global LOGIN
+    if not LOGIN:
+        update.message.reply_text(
+            "Супер, теперь твои результаты будут записываться, и ты сможешь узнать их, введя команду /info")
+    else:
+        update.message.reply_text("Твои результаты полностью обнулены. Удачи!")
     LOGIN = True
-    update.message.reply_text(
-        "Супер, теперь твои результаты будут записываться, и ты сможешь узнать их, введя команду /info")
 
     # Подключение к БД
     con = sqlite3.connect("Achievement.sqlite")
@@ -395,21 +389,22 @@ def login(update, context):
 ({x}, 'Flags', 'South America', 'Easy', 0), ({x}, 'Flags', 'South America', 'Medium', 0), ({x}, 'Flags', 'South America', 'Hard', 0), 
 ({x}, 'Flags', 'Northern America', 'Easy', 0), ({x}, 'Flags', 'Northern America', 'Medium', 0), ({x}, 'Flags', 'Northern America', 'Hard', 0)"""
     cur.execute(req)
-
-    req = f"""SELECT * FROM progress"""
-    res = cur.execute(req).fetchall()
-    # for r in res:
-    #     print(r)
-    show()
+    con.commit()
 
 
-def show():
+def info(update, context):
     con = sqlite3.connect("Achievement.sqlite")
     cur = con.cursor()
-    cur.execute("""INSERT INTO progress VALUES ("56565664", )""")
-    req = """SELECT * FROM progress"""
-    res = cur.execute(req).fetchall()
-    print(res)
+    x = str(update.message.chat_id)
+    request = f"""SELECT * from progress
+WHERE id = {x}"""
+    res = cur.execute(request).fetchall()
+    ans = list()
+    ans.append("Game | Location | Difficulty | Points")
+    for r in res:
+        s = f"{r[1]} | {r[2]} | {r[3]} | {r[4]}"
+        ans.append(s)
+    update.message.reply_text('\n'.join(ans), reply_markup=help_markup)
 
 
 def helper(update, context):
@@ -432,7 +427,7 @@ if __name__ == '__main__':
     beginning_keyboard = [['Начать']]
     beginning_markup = ReplyKeyboardMarkup(beginning_keyboard, one_time_keyboard=False)
 
-    help_keyboard = [['/start']]
+    help_keyboard = [['/start', '/info', '/help']]
     help_markup = ReplyKeyboardMarkup(help_keyboard, one_time_keyboard=False)
     # Создаём объект updater.
     # Вместо слова "TOKEN" надо разместить полученный от @BotFather токен
@@ -476,6 +471,8 @@ if __name__ == '__main__':
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('help', helper))
     dp.add_handler(CommandHandler('login', login))
+    dp.add_handler(CommandHandler('reset', login))
+    dp.add_handler(CommandHandler('info', info))
     # Регистрируем обработчик в диспетчере.
     # Запускаем цикл приема и обработки сообщений.
     updater.start_polling()
