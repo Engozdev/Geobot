@@ -10,6 +10,7 @@ import sqlite3
 
 TOKEN = "1629030108:AAFm4QIJw56pm0VXh5sLvu_3hcVQqioQyss"
 LOGIN = False
+user_result = 0
 user_answers = list()
 
 
@@ -329,7 +330,7 @@ def flag_quiz_10(update, context):
 
 
 def check_results(update, context):
-    global user_answers
+    global user_answers, user_result
     user_ans = update.message.text.lower()
     user_answers.append(user_ans)
     f_dir = context.user_data["game"].capitalize()
@@ -354,20 +355,6 @@ def check_results(update, context):
         return ConversationHandler.END
 
 
-def save_results(update, context):
-    # Подключение к БД
-    con = sqlite3.connect("Achievement.sqlite")
-    # Создание курсора
-    cur = con.cursor()
-    # Выполнение запроса и получение всех результатов
-    # TODO: updating user's results
-
-
-def stop(update, context):
-    update.message.reply_text("Извините за беспокойство, до свидания", reply_markup=help_markup)
-    return ConversationHandler.END
-
-
 def login(update, context):
     global LOGIN
     if not LOGIN:
@@ -390,6 +377,32 @@ def login(update, context):
 ({x}, 'Flags', 'Northern America', 'Easy', 0), ({x}, 'Flags', 'Northern America', 'Medium', 0), ({x}, 'Flags', 'Northern America', 'Hard', 0)"""
     cur.execute(req)
     con.commit()
+    con.close()
+
+
+def save_results(update, context):
+    global user_result
+    # Подключение к БД
+    print(1)
+    con = sqlite3.connect("Achievement.sqlite")
+    print(2)
+    # Создание курсора
+    cur = con.cursor()
+    print(3)
+    # Выполнение запроса и получение всех результатов
+    x = str(update.message.chat_id)
+    print(x)
+    f_dir = context.user_data["game"].capitalize()
+    s_dir = context.user_data["continent"].capitalize()
+    t_dir = context.user_data["difficulty"].capitalize()
+    request = f"""UPDATE progress
+    SET points = {user_result}
+    WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+    print(request)
+    cur.execute(request)
+    con.commit()
+    con.close()
+    return ConversationHandler.END
 
 
 def info(update, context):
@@ -399,6 +412,7 @@ def info(update, context):
     request = f"""SELECT * from progress
 WHERE id = {x}"""
     res = cur.execute(request).fetchall()
+    con.close()
     ans = list()
     ans.append("Game | Location | Difficulty | Points")
     for r in res:
@@ -411,6 +425,11 @@ def helper(update, context):
     update.message.reply_text(
         "Я - географический бот. Провожу викторины оп географии. Чтобы пройти викторину, нажми /start",
         reply_markup=help_markup)
+
+
+def stop(update, context):
+    update.message.reply_text("Извините за беспокойство, до свидания", reply_markup=help_markup)
+    return ConversationHandler.END
 
 
 # Запускаем функцию main() в случае запуска скрипта.
@@ -465,13 +484,13 @@ if __name__ == '__main__':
             "Checkpoint": [MessageHandler(Filters.text & ~Filters.command, check_results, pass_user_data=True)],
             "SaveResults": [MessageHandler(Filters.text & ~Filters.command, save_results, pass_user_data=True)]
         },
-        fallbacks=[MessageHandler(Filters.command, stop)]
+        fallbacks=[MessageHandler(Filters.regex('/stop'), stop)]
     )
     dp.add_handler(conv_handler)
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('help', helper))
     dp.add_handler(CommandHandler('login', login))
-    dp.add_handler(CommandHandler('reset', login))
+    # dp.add_handler(CommandHandler('reset', login))
     dp.add_handler(CommandHandler('info', info))
     # Регистрируем обработчик в диспетчере.
     # Запускаем цикл приема и обработки сообщений.
