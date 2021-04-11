@@ -330,7 +330,7 @@ def flag_quiz_10(update, context):
 
 
 def check_results(update, context):
-    global user_answers, user_result
+    global user_answers, user_result, LOGIN
     user_ans = update.message.text.lower()
     user_answers.append(user_ans)
     f_dir = context.user_data["game"].capitalize()
@@ -344,11 +344,14 @@ def check_results(update, context):
             if data[i].strip() == user_answers[i].strip():
                 user_result += 1
         if user_result == 10:
-            update.message.reply_text(f"Wow, да ты географический гений! 10 из 10! Продолжай в том же духе!",
-                                      reply_markup=help_markup)
+            update.message.reply_text(
+                f"Wow, да ты географический гений! 10 из 10! Продолжай в том же духе! Оцени викторину",
+                reply_markup=help_markup)
         else:
-            update.message.reply_text(f"Твой результат: {user_result} из 10. Неплохо, но ты можешь лучше",
-                                      reply_markup=help_markup)
+            update.message.reply_text(
+                f"Твой результат: {user_result} из 10. Неплохо, но ты можешь лучше. Оцени викторину",
+                reply_markup=rate_markup)
+    user_answers.clear()
     if LOGIN:
         return "SaveResults"
     else:
@@ -383,22 +386,22 @@ def login(update, context):
 def save_results(update, context):
     global user_result
     # Подключение к БД
-    print(1)
+    update.message.reply_text("Спасибо за оценку!", reply_markup=help_markup)
     con = sqlite3.connect("Achievement.sqlite")
-    print(2)
     # Создание курсора
     cur = con.cursor()
-    print(3)
     # Выполнение запроса и получение всех результатов
     x = str(update.message.chat_id)
-    print(x)
+    # print(x)
     f_dir = context.user_data["game"].capitalize()
     s_dir = context.user_data["continent"].capitalize()
     t_dir = context.user_data["difficulty"].capitalize()
+    val = cur.execute(f"""SELECT points from progress
+    WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'""").fetchone()
+    print(val[0], user_result)
     request = f"""UPDATE progress
-    SET points = {user_result}
+    SET points = {val[0] + user_result}
     WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
-    print(request)
     cur.execute(request)
     con.commit()
     con.close()
@@ -410,7 +413,7 @@ def info(update, context):
     cur = con.cursor()
     x = str(update.message.chat_id)
     request = f"""SELECT * from progress
-WHERE id = {x}"""
+    WHERE id = {x}"""
     res = cur.execute(request).fetchall()
     con.close()
     ans = list()
@@ -448,6 +451,10 @@ if __name__ == '__main__':
 
     help_keyboard = [['/start', '/info', '/help']]
     help_markup = ReplyKeyboardMarkup(help_keyboard, one_time_keyboard=False)
+
+    rate_keyboard = [['⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐']]
+    rate_markup = ReplyKeyboardMarkup(rate_keyboard, one_time_keyboard=False)
+
     # Создаём объект updater.
     # Вместо слова "TOKEN" надо разместить полученный от @BotFather токен
     updater = Updater(TOKEN, use_context=True)
