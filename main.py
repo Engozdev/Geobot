@@ -10,14 +10,11 @@ import sqlite3
 import sys
 import requests
 from token_data import TOKEN
+from borders_encyclopedia import borders_encyclopedia
 
 LOGIN = False
 user_result = 0
 user_answers = list()
-
-
-# Определяем функцию-обработчик сообщений.
-# У неё два параметра, сам бот и класс updater, принявший сообщение.
 
 
 def start(update, context):
@@ -359,14 +356,7 @@ def border_quiz_1(update, context):
         path_to_data = path + '/ans.txt'
         with open(path_to_data, mode='r', encoding='utf8') as data:
             names = data.readlines()
-        coords = get_ll(names[0].strip())
-        map_request = f"https://static-maps.yandex.ru/1.x/?ll={coords}&l=sat&pt=2.906263,47.589146,pm2rdm&" \
-                      f"pl=c:ffff0000,bw:1,w:2," \
-                      f"1.988267,51.012369,8.005279,48.957596,7.385603,47.563411,5.922205,46.228316," \
-                      f"6.673080,46.412218,6.572156,45.183963,7.440102,43.782379,6.250702,43.132392," \
-                      f"4.259497,43.467014,3.363289,43.286582,0.689137,42.861991,0.581576,42.727936," \
-                      f"-1.779820,43.368730,-1.160999,46.167456,-4.744144,48.528866,-1.407616,48.663615," \
-                      f"-1.532320,49.667046,-0.107681,49.295354,1.988267,51.012369"
+        map_request = borders_encyclopedia[s_dir][t_dir][0]
         response = requests.get(map_request)
         if not response:
             print("Ошибка выполнения запроса:")
@@ -405,15 +395,7 @@ def border_quiz_2(update, context):
         path_to_data = path + '/ans.txt'
         with open(path_to_data, mode='r', encoding='utf8') as data:
             names = data.readlines()
-        coords = get_ll(names[1].strip())
-        map_request = f"https://static-maps.yandex.ru/1.x/?ll={coords}&l=sat&pt=11.078753,45.949396,pm2rdm&" \
-                      f"pl=c:ffff0000,bw:1,w:2," \
-                      f"7.569078,43.910962,6.747364,45.075701,7.015151,45.879271,7.960765,46.000090," \
-                      f"8.450661,46.442929,8.997522,45.785294,10.159601,46.261484,10.626712,46.827464," \
-                      f"13.611661,46.545216,12.130579,45.321053,13.575204,43.515401,18.381438,39.906873," \
-                      f"17.032516,40.556523,16.451476,39.910382,17.121128,38.955071,15.007553,36.698615," \
-                      f"12.514617,38.071556,15.538655,38.240585,15.793369,39.879831,10.661173,43.020464," \
-                      f"10.113811,44.049483,8.921538,44.458467,8.189916,44.069024,7.569078,43.910962"
+        map_request = borders_encyclopedia[s_dir][t_dir][1]
         response = requests.get(map_request)
         if not response:
             print("Ошибка выполнения запроса:")
@@ -452,13 +434,7 @@ def border_quiz_3(update, context):
         path_to_data = path + '/ans.txt'
         with open(path_to_data, mode='r', encoding='utf8') as data:
             names = data.readlines()
-        coords = get_ll(names[2].strip())
-        map_request = f"https://static-maps.yandex.ru/1.x/?ll={coords}&l=sat&pt=7.231986,61.400856,pm2rdm" \
-                      f"&pl=c:ffff0000,bw:1,w:2," \
-                      f"30.718656,69.747546,28.968125,69.149642,28.977413,69.731236,25.828935,69.646006," \
-                      f"25.011148,68.678082,23.171129,68.707824,21.658224,69.301635,20.002206,69.060187," \
-                      f"19.924517,68.381488,18.268499,68.593100,17.880050,68.002911,17.184932,68.132849," \
-                      f"14.412636,66.176211,13.619382,64.590908,12.008342,63.607401,10.593592,59.111509"
+        map_request = borders_encyclopedia[s_dir][t_dir][2]
         response = requests.get(map_request)
         if not response:
             print("Ошибка выполнения запроса:")
@@ -498,13 +474,7 @@ def border_quiz_4(update, context):
         with open(path_to_data, mode='r', encoding='utf8') as data:
             names = data.readlines()
         # получаем название страны
-        coords = get_ll(names[3].strip())
-        map_request = f"https://static-maps.yandex.ru/1.x/?ll={coords}&l=sat&pt=19.921391,52.366182,pm2rdm" \
-                      f"&pl=c:ffff0000,bw:1,w:1," \
-                      f"19.823583,54.435378,23.447932,53.947110,23.913221,50.599173,22.223490,49.399585," \
-                      f"19.946028,49.335613,16.468555,50.721201,14.983317,51.098645,14.756163,52.597302," \
-                      f"14.173716,52.906531,14.508623,53.335753,14.304743,53.895829,18.246045,54.849347," \
-                      f"18.911207,54.312734,19.823583,54.435378"
+        map_request = borders_encyclopedia[s_dir][t_dir][3]
         response = requests.get(map_request)
         if not response:
             print("Ошибка выполнения запроса:")
@@ -546,12 +516,7 @@ def border_quiz_5(update, context):
         with open(path_to_data, mode='r', encoding='utf8') as data:
             names = data.readlines()
         # получаем название страны
-        coords = get_ll(names[4].strip())
-        map_request = f"https://static-maps.yandex.ru/1.x/?ll={coords}&l=sat&pt=-8.072796,40.041360,pm2rdm&" \
-                      f"pl=c:ffff0000,bw:1,w:2," \
-                      f"-8.861398,41.869081,-8.145928,42.051961,-8.126326,41.847100,-6.626780,41.927660," \
-                      f"-6.264145,41.568014,-6.950212,41.050715,-7.087425,40.176870,-7.557871,39.648560," \
-                      f"-7.038420,39.009175,-7.340290,38.451826,-7.546110,37.583430,-7.418697,37.168885"
+        map_request = borders_encyclopedia[s_dir][t_dir][4]
         response = requests.get(map_request)
         if not response:
             print("Ошибка выполнения запроса:")
@@ -593,8 +558,7 @@ def border_quiz_6(update, context):
         with open(path_to_data, mode='r', encoding='utf8') as data:
             names = data.readlines()
         # получаем название страны
-        coords = get_ll(names[5].strip())
-        map_request = f"https://static-maps.yandex.ru/1.x/?ll={coords}&l=sat&pt=95.142753,65.573467,pm2rdm&spn=40,40"
+        map_request = borders_encyclopedia[s_dir][t_dir][5]
         response = requests.get(map_request)
         if not response:
             print("Ошибка выполнения запроса:")
@@ -636,14 +600,7 @@ def border_quiz_7(update, context):
         with open(path_to_data, mode='r', encoding='utf8') as data:
             names = data.readlines()
         # получаем название страны
-        coords = get_ll(names[6].strip())
-        map_request = f"https://static-maps.yandex.ru/1.x/?ll={coords}&l=sat&pt=-3.289370,40.829661,pm2rdm&" \
-                      f"pl=c:ffff0000,bw:1,w:1," \
-                      f"3.363289,43.286582,0.689137,42.861991,0.581576,42.727936," \
-                      f"-1.779820,43.368730,-7.562473,43.728413,-9.255000,43.091561," \
-                      f"-8.861398,41.869081,-8.145928,42.051961,-8.126326,41.847100,-6.626780,41.927660," \
-                      f"-6.264145,41.568014,-6.950212,41.050715,-7.087425,40.176870,-7.557871,39.648560," \
-                      f"-7.038420,39.009175,-7.340290,38.451826,-7.546110,37.583430,-7.418697,37.168885"
+        map_request = borders_encyclopedia[s_dir][t_dir][6]
         response = requests.get(map_request)
         if not response:
             print("Ошибка выполнения запроса:")
@@ -685,12 +642,7 @@ def border_quiz_8(update, context):
         with open(path_to_data, mode='r', encoding='utf8') as data:
             names = data.readlines()
         # получаем название страны
-        coords = get_ll(names[7].strip())
-        map_request = f"https://static-maps.yandex.ru/1.x/?ll={coords}&l=sat&pt=18.750409,64.205872,pm2rdm&" \
-                      f"pl=c:ffff0000,bw:1,w:2,11.286382,58.803911,12.465960,60.110043,12.815057,61.334483," \
-                      f"12.132144,61.768894,12.421865,63.823773,14.516133,66.127224," \
-                      f"16.357931,67.084542,17.301594,68.098296,19.847000,68.374775," \
-                      f"20.447136,69.051475,22.599349,68.405289,23.509900,67.240518,24.047953,65.847326"
+        map_request = borders_encyclopedia[s_dir][t_dir][7]
         response = requests.get(map_request)
         if not response:
             print("Ошибка выполнения запроса:")
@@ -732,14 +684,7 @@ def border_quiz_9(update, context):
         with open(path_to_data, mode='r', encoding='utf8') as data:
             names = data.readlines()
         # получаем название страны
-        coords = get_ll(names[8].strip())
-        map_request = f"https://static-maps.yandex.ru/1.x/?ll={coords}&l=sat&pt=33.201910,48.919078,pm2rdm&" \
-                      f"pl=c:ffff0000,bw:1,w:2," \
-                      f"38.164042,47.197005,39.778201,47.967086,40.005839,49.580913,35.639331,50.368315," \
-                      f"35.121972,51.220835,34.190726,51.389466,33.590590,52.350210,31.252128,52.096028," \
-                      f"30.527825,51.337646,27.630616,51.505846,25.271460,51.968387,23.636606,51.363563," \
-                      f"22.192140,48.363029,26.393094,48.224937,28.007253,48.445704,29.207526,47.682785," \
-                      f"30.159466,46.438407,28.752250,45.834184,29.580024,45.369344"
+        map_request = borders_encyclopedia[s_dir][t_dir][8]
         response = requests.get(map_request)
         if not response:
             print("Ошибка выполнения запроса:")
@@ -781,8 +726,7 @@ def border_quiz_10(update, context):
         with open(path_to_data, mode='r', encoding='utf8') as data:
             names = data.readlines()
         # получаем название страны
-        coords = get_ll(names[9].strip())
-        map_request = f"https://static-maps.yandex.ru/1.x/?ll={coords}&l=sat&pt=-2.463147,54.490322,pm2rdm&spn=11.6,11.6"
+        map_request = borders_encyclopedia[s_dir][t_dir][9]
         response = requests.get(map_request)
         if not response:
             print("Ошибка выполнения запроса:")
