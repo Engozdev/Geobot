@@ -837,8 +837,7 @@ def check_results(update, context):
     if LOGIN:
         return "SaveResults"
     else:
-        update.message.reply_text('Классно поиграли, хочешь еще раз?', reply_markup=help_markup)
-        return ConversationHandler.END
+        return 'restart'
 
 
 def login(update, context):
@@ -886,13 +885,17 @@ def save_results(update, context):
     t_dir = context.user_data["difficulty"].capitalize()
     val = cur.execute(f"""SELECT points from progress
     WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'""").fetchone()
-    print(val[0], user_result)
     request = f"""UPDATE progress
     SET points = {val[0] + user_result}
     WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
     cur.execute(request)
     con.commit()
     con.close()
+    return ConversationHandler.END
+
+
+def restart(update, context):
+    update.message.reply_text('Классно поиграли, хочешь еще раз?', reply_markup=help_markup)
     return ConversationHandler.END
 
 
@@ -971,6 +974,7 @@ if __name__ == '__main__':
             1: [MessageHandler(Filters.text & ~Filters.command, game_choice, pass_user_data=True)],
             2: [MessageHandler(Filters.text & ~Filters.command, continent_choice, pass_user_data=True)],
             3: [MessageHandler(Filters.text & ~Filters.command, diff_choice, pass_user_data=True)],
+            # borders cases
             "Borders1": [MessageHandler(Filters.text & ~Filters.command, border_quiz_1, pass_user_data=True)],
             "Borders2": [MessageHandler(Filters.text & ~Filters.command, border_quiz_2, pass_user_data=True)],
             "Borders3": [MessageHandler(Filters.text & ~Filters.command, border_quiz_3, pass_user_data=True)],
@@ -992,6 +996,7 @@ if __name__ == '__main__':
             "Flags8": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_8, pass_user_data=True)],
             "Flags9": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_9, pass_user_data=True)],
             "Flags10": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_10, pass_user_data=True)],
+            "restart": [MessageHandler(Filters.text & ~Filters.command, restart, pass_user_data=True)],
             "Checkpoint": [MessageHandler(Filters.text & ~Filters.command, check_results, pass_user_data=True)],
             "SaveResults": [MessageHandler(Filters.text & ~Filters.command, save_results, pass_user_data=True)]
         },
@@ -1001,7 +1006,7 @@ if __name__ == '__main__':
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('help', helper))
     dp.add_handler(CommandHandler('login', login))
-    # dp.add_handler(CommandHandler('reset', login))
+    dp.add_handler(CommandHandler('reset', login))
     dp.add_handler(CommandHandler('info', info))
     # Регистрируем обработчик в диспетчере.
     # Запускаем цикл приема и обработки сообщений.
