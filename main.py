@@ -360,7 +360,8 @@ def border_quiz_1(update, context):
         with open(path_to_data, mode='r', encoding='utf8') as data:
             names = data.readlines()
         coords = get_ll(names[0].strip())
-        map_request = f"https://static-maps.yandex.ru/1.x/?ll={coords}&l=sat&pl=c:ffff0000,bw:1,w:2," \
+        map_request = f"https://static-maps.yandex.ru/1.x/?ll={coords}&l=sat&pt=2.906263,47.589146,pm2rdm&" \
+                      f"pl=c:ffff0000,bw:1,w:2," \
                       f"1.988267,51.012369,8.005279,48.957596,7.385603,47.563411,5.922205,46.228316," \
                       f"6.673080,46.412218,6.572156,45.183963,7.440102,43.782379,6.250702,43.132392," \
                       f"4.259497,43.467014,3.363289,43.286582,0.689137,42.861991,0.581576,42.727936," \
@@ -383,7 +384,7 @@ def border_quiz_1(update, context):
             keys = file.readlines()[0].strip().split(', ')
             ans_key = [[keys[0], keys[1]], [keys[2], keys[3]]]
             ans_mark = ReplyKeyboardMarkup(ans_key, one_time_keyboard=False)
-        update.message.reply_text("Какой стране принадлежит этот флаг?", reply_markup=ans_mark)
+        update.message.reply_text("Какая страна выделена на карте?", reply_markup=ans_mark)
         os.remove(map_file)
         return 'Borders2'
     except Exception as ex:
@@ -405,7 +406,8 @@ def border_quiz_2(update, context):
         with open(path_to_data, mode='r', encoding='utf8') as data:
             names = data.readlines()
         coords = get_ll(names[1].strip())
-        map_request = f"https://static-maps.yandex.ru/1.x/?ll={coords}&l=sat&pl=c:ffff0000,bw:1,w:2," \
+        map_request = f"https://static-maps.yandex.ru/1.x/?ll={coords}&l=sat&pt=11.078753,45.949396,pm2rdm&" \
+                      f"pl=c:ffff0000,bw:1,w:2," \
                       f"7.569078,43.910962,6.747364,45.075701,7.015151,45.879271,7.960765,46.000090," \
                       f"8.450661,46.442929,8.997522,45.785294,10.159601,46.261484,10.626712,46.827464," \
                       f"13.611661,46.545216,12.130579,45.321053,13.575204,43.515401,18.381438,39.906873," \
@@ -429,7 +431,7 @@ def border_quiz_2(update, context):
             keys = file.readlines()[1].strip().split(', ')
             ans_key = [[keys[0], keys[1]], [keys[2], keys[3]]]
             ans_mark = ReplyKeyboardMarkup(ans_key, one_time_keyboard=False)
-        update.message.reply_text("Какой стране принадлежит этот флаг?", reply_markup=ans_mark)
+        update.message.reply_text("Какая страна выделена на карте?", reply_markup=ans_mark)
         os.remove(map_file)
         return 'Borders3'
     except Exception as ex:
@@ -474,9 +476,57 @@ def border_quiz_3(update, context):
             keys = file.readlines()[2].strip().split(', ')
             ans_key = [[keys[0], keys[1]], [keys[2], keys[3]]]
             ans_mark = ReplyKeyboardMarkup(ans_key, one_time_keyboard=False)
-        update.message.reply_text("Какой стране принадлежит этот флаг?", reply_markup=ans_mark)
+        update.message.reply_text("Какая страна выделена на карте?", reply_markup=ans_mark)
         os.remove(map_file)
         return 'Borders4'
+    except Exception as ex:
+        update.message.reply_text("Извини, что-то пошло не так, но мы уже работаем над проблемой.",
+                                  reply_markup=help_markup)
+        print(ex)
+
+
+def border_quiz_4(update, context):
+    try:
+        global user_answers
+        user_ans = update.message.text.lower()
+        user_answers.append(user_ans)
+        f_dir = context.user_data["game"].capitalize()
+        s_dir = context.user_data["continent"].capitalize()
+        t_dir = context.user_data["difficulty"].capitalize()
+        path = f'data/{f_dir}/{s_dir}/{t_dir}'
+        path_to_data = path + '/ans.txt'
+        with open(path_to_data, mode='r', encoding='utf8') as data:
+            names = data.readlines()
+        # получаем название страны
+        coords = get_ll(names[3].strip())
+        map_request = f"https://static-maps.yandex.ru/1.x/?ll={coords}&l=sat&pt=19.921391,52.366182,pm2rdm" \
+                      f"&pl=c:ffff0000,bw:1,w:1," \
+                      f"19.823583,54.435378,23.447932,53.947110,23.913221,50.599173,22.223490,49.399585," \
+                      f"19.946028,49.335613,16.468555,50.721201,14.983317,51.098645,14.756163,52.597302," \
+                      f"14.173716,52.906531,14.508623,53.335753,14.304743,53.895829,18.246045,54.849347," \
+                      f"18.911207,54.312734,19.823583,54.435378"
+        response = requests.get(map_request)
+        if not response:
+            print("Ошибка выполнения запроса:")
+            print(map_request)
+            print("Http статус:", response.status_code, "(", response.reason, ")")
+            sys.exit(1)
+
+        map_file = "map.png"
+        with open(map_file, "wb") as file:
+            file.write(response.content)
+        context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(map_file, mode='rb'))
+
+        path += '/akeyboards.txt'
+        with open(path, mode='r', encoding='utf-8') as file:
+            # выбираем нужную клавиатуру
+            keys = file.readlines()[3].strip().split(', ')
+            ans_key = [[keys[0], keys[1]], [keys[2], keys[3]]]
+            ans_mark = ReplyKeyboardMarkup(ans_key, one_time_keyboard=False)
+        update.message.reply_text("Какаия страна выделена на карте?", reply_markup=ans_mark)
+        os.remove(map_file)
+        # вызываем следующий вопрос
+        return 'Borders5'
     except Exception as ex:
         update.message.reply_text("Извини, что-то пошло не так, но мы уже работаем над проблемой.",
                                   reply_markup=help_markup)
