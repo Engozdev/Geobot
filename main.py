@@ -786,20 +786,22 @@ def check_results(update, context):
 
 def login(update, context):
     global LOGIN
-    if not LOGIN:
-        update.message.reply_text(
-            "Супер, теперь твои результаты будут записываться, и ты сможешь узнать их, введя команду /info")
-    else:
-        # TODO: add update values for reset function
-        update.message.reply_text("Твои результаты полностью обнулены. Удачи!")
-    LOGIN = True
-
     # Подключение к БД
     con = sqlite3.connect("Achievement.sqlite")
     # Создание курсора
     cur = con.cursor()
-    # Выполнение запроса и получение всех результатов
     x = str(update.message.chat_id)
+    if not LOGIN:
+        update.message.reply_text(
+            "Супер, теперь твои результаты будут записываться, и ты сможешь узнать их, введя команду /info")
+    else:
+        reques = f"""DELETE from progress WHERE id = {x}"""
+        cur.execute(reques)
+        con.commit()
+        update.message.reply_text("Твои результаты полностью обнулены. Удачи!", reply_markup=help_markup)
+    LOGIN = True
+    # Выполнение запроса и получение всех результатов
+
     req = f"""INSERT INTO progress VALUES ({x}, 'Flags', 'Europe', 'Easy', 0), ({x}, 'Flags', 'Europe', 'Medium', 0), 
     ({x}, 'Flags', 'Europe', 'Hard', 0), ({x}, 'Flags', 'Asia', 'Easy', 0), ({x}, 'Flags', 'Asia', 'Medium', 0), 
     ({x}, 'Flags', 'Asia', 'Hard', 0), ({x}, 'Flags', 'Africa', 'Easy', 0), ({x}, 'Flags', 'Africa', 'Medium', 0), 
@@ -960,4 +962,3 @@ if __name__ == '__main__':
     # Ждём завершения приложения.
     # (например, получения сигнала SIG_TERM при нажатии клавиш Ctrl+C)
     updater.idle()
-# invitation-link: t.me/geo_shmeo_test_bot
