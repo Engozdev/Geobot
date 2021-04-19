@@ -37,7 +37,7 @@ def game_choice(update, context):
 
 def continent_choice(update, context):
     ans = update.message.text
-    if ans.lower() not in ['europe', 'asia', 'africa', 'south america', 'northern america']:
+    if ans.lower() not in ['europe', 'asia', 'africa', 'america']:
         update.message.reply_text("Неправильные данные, начинай заново",
                                   reply_markup=ReplyKeyboardRemove())
         return ConversationHandler.END
@@ -493,7 +493,7 @@ def border_quiz_4(update, context):
             keys = file.readlines()[3].strip().split(', ')
             ans_key = [[keys[0], keys[1]], [keys[2], keys[3]]]
             ans_mark = ReplyKeyboardMarkup(ans_key, one_time_keyboard=False)
-        update.message.reply_text("Какаия страна выделена на карте?", reply_markup=ans_mark)
+        update.message.reply_text("Какая страна выделена на карте?", reply_markup=ans_mark)
         os.remove(map_file)
         # вызываем следующий вопрос
         return 'Borders5'
@@ -535,7 +535,7 @@ def border_quiz_5(update, context):
             keys = file.readlines()[4].strip().split(', ')
             ans_key = [[keys[0], keys[1]], [keys[2], keys[3]]]
             ans_mark = ReplyKeyboardMarkup(ans_key, one_time_keyboard=False)
-        update.message.reply_text("Какаия страна выделена на карте?", reply_markup=ans_mark)
+        update.message.reply_text("Какая страна выделена на карте?", reply_markup=ans_mark)
         os.remove(map_file)
         # вызываем следующий вопрос
         return 'Borders6'
@@ -577,7 +577,7 @@ def border_quiz_6(update, context):
             keys = file.readlines()[5].strip().split(', ')
             ans_key = [[keys[0], keys[1]], [keys[2], keys[3]]]
             ans_mark = ReplyKeyboardMarkup(ans_key, one_time_keyboard=False)
-        update.message.reply_text("Какаия страна выделена на карте?", reply_markup=ans_mark)
+        update.message.reply_text("Какая страна выделена на карте?", reply_markup=ans_mark)
         os.remove(map_file)
         # вызываем следующий вопрос
         return 'Borders7'
@@ -619,7 +619,7 @@ def border_quiz_7(update, context):
             keys = file.readlines()[6].strip().split(', ')
             ans_key = [[keys[0], keys[1]], [keys[2], keys[3]]]
             ans_mark = ReplyKeyboardMarkup(ans_key, one_time_keyboard=False)
-        update.message.reply_text("Какаия страна выделена на карте?", reply_markup=ans_mark)
+        update.message.reply_text("Какая страна выделена на карте?", reply_markup=ans_mark)
         os.remove(map_file)
         # вызываем следующий вопрос
         return 'Borders8'
@@ -661,7 +661,7 @@ def border_quiz_8(update, context):
             keys = file.readlines()[7].strip().split(', ')
             ans_key = [[keys[0], keys[1]], [keys[2], keys[3]]]
             ans_mark = ReplyKeyboardMarkup(ans_key, one_time_keyboard=False)
-        update.message.reply_text("Какаия страна выделена на карте?", reply_markup=ans_mark)
+        update.message.reply_text("Какая страна выделена на карте?", reply_markup=ans_mark)
         os.remove(map_file)
         # вызываем следующий вопрос
         return 'Borders9'
@@ -703,7 +703,7 @@ def border_quiz_9(update, context):
             keys = file.readlines()[8].strip().split(', ')
             ans_key = [[keys[0], keys[1]], [keys[2], keys[3]]]
             ans_mark = ReplyKeyboardMarkup(ans_key, one_time_keyboard=False)
-        update.message.reply_text("Какаия страна выделена на карте?", reply_markup=ans_mark)
+        update.message.reply_text("Какая страна выделена на карте?", reply_markup=ans_mark)
         os.remove(map_file)
         # вызываем следующий вопрос
         return 'Borders10'
@@ -745,7 +745,7 @@ def border_quiz_10(update, context):
             keys = file.readlines()[9].strip().split(', ')
             ans_key = [[keys[0], keys[1]], [keys[2], keys[3]]]
             ans_mark = ReplyKeyboardMarkup(ans_key, one_time_keyboard=False)
-        update.message.reply_text("Какаия страна выделена на карте?", reply_markup=ans_mark)
+        update.message.reply_text("Какая страна выделена на карте?", reply_markup=ans_mark)
         os.remove(map_file)
         # вызываем следующий вопрос
         return 'Checkpoint'
@@ -790,6 +790,7 @@ def login(update, context):
         update.message.reply_text(
             "Супер, теперь твои результаты будут записываться, и ты сможешь узнать их, введя команду /info")
     else:
+        # TODO: add update values for reset function
         update.message.reply_text("Твои результаты полностью обнулены. Удачи!")
     LOGIN = True
 
@@ -884,7 +885,7 @@ if __name__ == '__main__':
     start_game_keyboard = [['Flags', 'Borders']]
     start_game_markup = ReplyKeyboardMarkup(start_game_keyboard, one_time_keyboard=False)
 
-    difficulty_keyboard = [['Easy', 'Medium', 'Hard']]
+    difficulty_keyboard = [['Easy'], ['Medium', 'Hard']]
     difficulty_markup = ReplyKeyboardMarkup(difficulty_keyboard, one_time_keyboard=False)
 
     beginning_keyboard = [['Начать']]
@@ -959,3 +960,4 @@ if __name__ == '__main__':
     # Ждём завершения приложения.
     # (например, получения сигнала SIG_TERM при нажатии клавиш Ctrl+C)
     updater.idle()
+# invitation-link: t.me/geo_shmeo_test_bot
