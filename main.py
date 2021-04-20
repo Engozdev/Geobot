@@ -962,3 +962,4 @@ if __name__ == '__main__':
     # Ждём завершения приложения.
     # (например, получения сигнала SIG_TERM при нажатии клавиш Ctrl+C)
     updater.idle()
+# TODO: change keyboard for Hard Europe
