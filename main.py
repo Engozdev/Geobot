@@ -879,6 +879,10 @@ def stop(update, context):
     return ConversationHandler.END
 
 
+def unexpected_message(update, context):
+    update.message.reply_text(f"Прости, я тебя не понимаю, что ты имеешь в виду, написав: '{update.message.text}'")
+
+
 # Запускаем функцию main() в случае запуска скрипта.
 if __name__ == '__main__':
     continent_keyboard = [['Europe', 'Asia'], ['America', 'Africa']]
@@ -950,6 +954,8 @@ if __name__ == '__main__':
         fallbacks=[MessageHandler(Filters.regex('/stop'), stop)]
     )
     dp.add_handler(conv_handler)
+    text_handler = MessageHandler(Filters.text, unexpected_message)
+    dp.add_handler(text_handler)
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('help', helper))
     dp.add_handler(CommandHandler('login', login))
