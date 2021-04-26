@@ -9,20 +9,39 @@ import os
 import sqlite3
 import sys
 import requests
-from token_data import TOKEN
 from borders_encyclopedia import borders_encyclopedia
 
 # global variables to keep user's data
 LOGIN = False
-user_result = 0
-user_answers = list()
+TOKEN = '1756966385:AAGLGFkAqqHX2eUf-cu5mceG6xPYjsHCREI'
 
 
 # the beginning of the quiz
 def start(update, context):
-    s1 = "Привет, я бот-географ. Я люблю проводить викторину, географические конечно."
+    con = sqlite3.connect("Achievement.sqlite")
+    # Создание курсора
+    cur = con.cursor()
+    x = str(update.message.chat_id)
+    test = cur.execute(f"SELECT * FROM progress WHERE id = {x}").fetchall()
+    if len(test) == 0:
+        req = f"""INSERT INTO progress VALUES ({x}, 'Flags', 'Europe', 'Easy', 0, ''), ({x}, 'Flags', 'Europe', 'Medium', 0, ''), 
+                ({x}, 'Flags', 'Europe', 'Hard', 0, ''), ({x}, 'Flags', 'Asia', 'Easy', 0, ''), ({x}, 'Flags', 'Asia', 'Medium', 0, ''), 
+                ({x}, 'Flags', 'Asia', 'Hard', 0, ''), ({x}, 'Flags', 'Africa', 'Easy', 0, ''), ({x}, 'Flags', 'Africa', 'Medium', 0, ''), 
+                ({x}, 'Flags', 'Africa', 'Hard', 0, ''), ({x}, 'Flags', 'America', 'Easy', 0, ''), 
+                ({x}, 'Flags', 'America', 'Medium', 0, ''), ({x}, 'Flags', 'America', 'Hard', 0, ''),  
+                ({x}, 'Borders', 'Europe', 'Easy', 0, ''), ({x}, 'Borders', 'Europe', 'Medium', 0, ''), 
+                ({x}, 'Borders', 'Europe', 'Hard', 0, ''), ({x}, 'Borders', 'Asia', 'Easy', 0, ''), ({x}, 'Borders', 'Asia', 'Medium', 0, ''), 
+                ({x}, 'Borders', 'Asia', 'Hard', 0, ''), ({x}, 'Borders', 'Africa', 'Easy', 0, ''), ({x}, 'Borders', 'Africa', 'Medium', 0, ''), 
+                ({x}, 'Borders', 'Africa', 'Hard', 0, ''), ({x}, 'Borders', 'America', 'Easy', 0, ''), 
+                ({x}, 'Borders', 'America', 'Medium', 0, ''), ({x}, 'Borders', 'America', 'Hard', 0, '')"""
+        cur.execute(req)
+        # committing the changes
+        con.commit()
+        con.close()
+    # Выполнение запроса и получение всех результатов
+    s1 = "Привет, я бот-географ. Я люблю проводить викторины, географические конечно."
     s2 = "Чтобы узнать мои возможности, введи /help"
-    s3 = "Чтобы начать виторину, введи /start"
+    s3 = "Чтобы начать викторину, введи /start"
     s = '\n'.join([s1, s2, s3])
     update.message.reply_text(
         s, reply_markup=start_game_markup)
@@ -102,13 +121,28 @@ def flag_quiz_1(update, context):
 
 def flag_quiz_2(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
-        src = list()
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        answers += user_ans
+        request = f"""UPDATE progress
+            SET answers = "{answers}"
+            WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
+        # user_answers.append(user_ans)
+        src = list()
+
         path = f'data/{f_dir}/{s_dir}/{t_dir}'
         for currentdir, dirs, files in os.walk(path):
             src = files
@@ -130,14 +164,27 @@ def flag_quiz_2(update, context):
 
 def flag_quiz_3(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
-        src = list()
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        answers += ', ' + user_ans
+        request = f"""UPDATE progress
+                    SET answers = '{answers}'
+                    WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
         path = f'data/{f_dir}/{s_dir}/{t_dir}'
+        src = list()
         for currentdir, dirs, files in os.walk(path):
             src = files
         path_to_photo = path + '/' + src[4]
@@ -158,13 +205,26 @@ def flag_quiz_3(update, context):
 
 def flag_quiz_4(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
-        src = list()
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        answers += ', ' + user_ans
+        request = f"""UPDATE progress
+                            SET answers = '{answers}'
+                            WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
+        src = list()
         path = f'data/{f_dir}/{s_dir}/{t_dir}'
         for currentdir, dirs, files in os.walk(path):
             src = files
@@ -186,13 +246,26 @@ def flag_quiz_4(update, context):
 
 def flag_quiz_5(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
-        src = list()
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        answers += ', ' + user_ans
+        request = f"""UPDATE progress
+                            SET answers = '{answers}'
+                            WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
+        src = list()
         path = f'data/{f_dir}/{s_dir}/{t_dir}'
         for currentdir, dirs, files in os.walk(path):
             src = files
@@ -214,13 +287,26 @@ def flag_quiz_5(update, context):
 
 def flag_quiz_6(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
-        src = list()
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        answers += ', ' + user_ans
+        request = f"""UPDATE progress
+                            SET answers = '{answers}'
+                            WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
+        src = list()
         path = f'data/{f_dir}/{s_dir}/{t_dir}'
         for currentdir, dirs, files in os.walk(path):
             src = files
@@ -242,13 +328,26 @@ def flag_quiz_6(update, context):
 
 def flag_quiz_7(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
-        src = list()
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        answers += ', ' + user_ans
+        request = f"""UPDATE progress
+                            SET answers = '{answers}'
+                            WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
+        src = list()
         path = f'data/{f_dir}/{s_dir}/{t_dir}'
         for currentdir, dirs, files in os.walk(path):
             src = files
@@ -270,13 +369,26 @@ def flag_quiz_7(update, context):
 
 def flag_quiz_8(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
-        src = list()
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        answers += ', ' + user_ans
+        request = f"""UPDATE progress
+                            SET answers = '{answers}'
+                            WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
+        src = list()
         path = f'data/{f_dir}/{s_dir}/{t_dir}'
         for currentdir, dirs, files in os.walk(path):
             src = files
@@ -298,13 +410,26 @@ def flag_quiz_8(update, context):
 
 def flag_quiz_9(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
-        src = list()
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        answers += ', ' + user_ans
+        request = f"""UPDATE progress
+                            SET answers = '{answers}'
+                            WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
+        src = list()
         path = f'data/{f_dir}/{s_dir}/{t_dir}'
         for currentdir, dirs, files in os.walk(path):
             src = files
@@ -326,13 +451,26 @@ def flag_quiz_9(update, context):
 
 def flag_quiz_10(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
-        src = list()
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        answers += ', ' + user_ans
+        request = f"""UPDATE progress
+                            SET answers = '{answers}'
+                            WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
+        src = list()
         path = f'data/{f_dir}/{s_dir}/{t_dir}'
         for currentdir, dirs, files in os.walk(path):
             src = files
@@ -413,12 +551,25 @@ def border_quiz_1(update, context):
 
 def border_quiz_2(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        print([answers])
+        answers += user_ans
+        request = f"""UPDATE progress
+                    SET answers = '{answers}'
+                    WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
         path = f'data/Flags/{s_dir}/{t_dir}'
         map_request = borders_encyclopedia[s_dir][t_dir][1]
         response = requests.get(map_request)
@@ -449,12 +600,26 @@ def border_quiz_2(update, context):
 
 def border_quiz_3(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        print([answers])
+        answers += ', ' + user_ans
+        request = f"""UPDATE progress
+                    SET answers = '{answers}'
+                    WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
         path = f'data/Flags/{s_dir}/{t_dir}'
         map_request = borders_encyclopedia[s_dir][t_dir][2]
         response = requests.get(map_request)
@@ -485,12 +650,25 @@ def border_quiz_3(update, context):
 
 def border_quiz_4(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        answers += ', ' + user_ans
+        request = f"""UPDATE progress
+                    SET answers = '{answers}'
+                    WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
         path = f'data/Flags/{s_dir}/{t_dir}'
         map_request = borders_encyclopedia[s_dir][t_dir][3]
         response = requests.get(map_request)
@@ -523,12 +701,25 @@ def border_quiz_4(update, context):
 
 def border_quiz_5(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        answers += ', ' + user_ans
+        request = f"""UPDATE progress
+                    SET answers = '{answers}'
+                    WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
         path = f'data/Flags/{s_dir}/{t_dir}'
         map_request = borders_encyclopedia[s_dir][t_dir][4]
         response = requests.get(map_request)
@@ -561,12 +752,25 @@ def border_quiz_5(update, context):
 
 def border_quiz_6(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        answers += ', ' + user_ans
+        request = f"""UPDATE progress
+                    SET answers = '{answers}'
+                    WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
         path = f'data/Flags/{s_dir}/{t_dir}'
         map_request = borders_encyclopedia[s_dir][t_dir][5]
         response = requests.get(map_request)
@@ -599,12 +803,25 @@ def border_quiz_6(update, context):
 
 def border_quiz_7(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        answers += ', ' + user_ans
+        request = f"""UPDATE progress
+                    SET answers = '{answers}'
+                    WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
         path = f'data/Flags/{s_dir}/{t_dir}'
         map_request = borders_encyclopedia[s_dir][t_dir][6]
         response = requests.get(map_request)
@@ -637,12 +854,25 @@ def border_quiz_7(update, context):
 
 def border_quiz_8(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        answers += ', ' + user_ans
+        request = f"""UPDATE progress
+                    SET answers = '{answers}'
+                    WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
         path = f'data/Flags/{s_dir}/{t_dir}'
         map_request = borders_encyclopedia[s_dir][t_dir][7]
         response = requests.get(map_request)
@@ -675,12 +905,25 @@ def border_quiz_8(update, context):
 
 def border_quiz_9(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        answers += ', ' + user_ans
+        request = f"""UPDATE progress
+                            SET answers = '{answers}'
+                            WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
         path = f'data/Flags/{s_dir}/{t_dir}'
         map_request = borders_encyclopedia[s_dir][t_dir][8]
         response = requests.get(map_request)
@@ -713,12 +956,25 @@ def border_quiz_9(update, context):
 
 def border_quiz_10(update, context):
     try:
-        global user_answers
-        user_ans = update.message.text.lower()
-        user_answers.append(user_ans)
         f_dir = context.user_data["game"].capitalize()
         s_dir = context.user_data["continent"].capitalize()
         t_dir = context.user_data["difficulty"].capitalize()
+        user_ans = update.message.text.lower()
+        # making note to database about the answer
+        con = sqlite3.connect("Achievement.sqlite")
+        # Создание курсора
+        cur = con.cursor()
+        # Выполнение запроса и получение всех результатов
+        x = str(update.message.chat_id)
+        answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                              f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+        answers += ', ' + user_ans
+        request = f"""UPDATE progress
+                    SET answers = '{answers}'
+                    WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+        cur.execute(request)
+        con.commit()
+        con.close()
         path = f'data/Flags/{s_dir}/{t_dir}'
         path_to_data = path + '/ans.txt'
         map_request = borders_encyclopedia[s_dir][t_dir][9]
@@ -751,12 +1007,25 @@ def border_quiz_10(update, context):
 
 
 def check_results(update, context):
-    global user_answers, user_result, LOGIN
-    user_ans = update.message.text.lower()
-    user_answers.append(user_ans)
     f_dir = context.user_data["game"].capitalize()
     s_dir = context.user_data["continent"].capitalize()
     t_dir = context.user_data["difficulty"].capitalize()
+    user_ans = update.message.text.lower()
+    # making note to database about the answer
+    con = sqlite3.connect("Achievement.sqlite")
+    # Создание курсора
+    cur = con.cursor()
+    # Выполнение запроса и получение всех результатов
+    x = str(update.message.chat_id)
+    answers = cur.execute(f"SELECT answers FROM progress WHERE id = {x} AND type = '{f_dir}' AND "
+                          f"location = '{s_dir}' AND difficulty = '{t_dir}'").fetchone()[0]
+    answers += ', ' + user_ans
+    request = f"""UPDATE progress
+                SET answers = ''
+                WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+    cur.execute(request)
+    con.commit()
+    user_answers = answers.split(", ")
     path = f'data/Flags/{s_dir}/{t_dir}/ans.txt'
     # opening file with right answers
     with open(path, mode='r', encoding='utf-8') as f:
@@ -768,91 +1037,57 @@ def check_results(update, context):
                 user_result += 1
         if user_result == 10:
             update.message.reply_text(
-                f"Wow, да ты географический гений! 10 из 10! Продолжай в том же духе! Оцени викторину",
-                reply_markup=rate_markup)
+                f"Wow, да ты географический гений! 10 из 10! Продолжай в том же духе! Сыграем еще раз?",
+                reply_markup=help_markup)
         else:
             update.message.reply_text(
-                f"Твой результат: {user_result} из 10. Неплохо, но ты можешь лучше. Оцени викторину",
-                reply_markup=rate_markup)
-    user_answers.clear()
+                f"Твой результат: {user_result} из 10. Неплохо, но ты можешь лучше. Сыграем еще раз?",
+                reply_markup=help_markup)
+    val = cur.execute(f"""SELECT points from progress
+        WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'""").fetchone()
+    request = f"""UPDATE progress
+        SET points = {val[0] + user_result}
+        WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
+    cur.execute(request)
+    con.commit()
+    con.close()
     # finishing the conversation
-    if LOGIN:
-        return "SaveResults"
-    else:
-        return 'restart'
+    return ConversationHandler.END
 
 
 # making a notes in database about the user
-def login(update, context):
-    global LOGIN
+def reset(update, context):
     # Подключение к БД
     con = sqlite3.connect("Achievement.sqlite")
     # Создание курсора
     cur = con.cursor()
     # identifying user's id
     x = str(update.message.chat_id)
-    if not LOGIN:
-        update.message.reply_text(
-            "Супер, теперь твои результаты будут записываться, и ты сможешь узнать их, введя команду /info")
-    else:
-        # resetting case
-        reques = f"""DELETE from progress WHERE id = {x}"""
-        cur.execute(reques)
-        con.commit()
-        update.message.reply_text("Твои результаты полностью обнулены. Удачи!", reply_markup=help_markup)
-    LOGIN = True
+    # resetting case
+    reques = f"""DELETE from progress WHERE id = {x}"""
+    cur.execute(reques)
+    con.commit()
     # making notes about the user
-    req = f"""INSERT INTO progress VALUES ({x}, 'Flags', 'Europe', 'Easy', 0), ({x}, 'Flags', 'Europe', 'Medium', 0), 
-    ({x}, 'Flags', 'Europe', 'Hard', 0), ({x}, 'Flags', 'Asia', 'Easy', 0), ({x}, 'Flags', 'Asia', 'Medium', 0), 
-    ({x}, 'Flags', 'Asia', 'Hard', 0), ({x}, 'Flags', 'Africa', 'Easy', 0), ({x}, 'Flags', 'Africa', 'Medium', 0), 
-    ({x}, 'Flags', 'Africa', 'Hard', 0), ({x}, 'Flags', 'America', 'Easy', 0), 
-    ({x}, 'Flags', 'America', 'Medium', 0), ({x}, 'Flags', 'America', 'Hard', 0),  
-    ({x}, 'Borders', 'Europe', 'Easy', 0), ({x}, 'Borders', 'Europe', 'Medium', 0), 
-    ({x}, 'Borders', 'Europe', 'Hard', 0), ({x}, 'Borders', 'Asia', 'Easy', 0), ({x}, 'Borders', 'Asia', 'Medium', 0), 
-    ({x}, 'Borders', 'Asia', 'Hard', 0), ({x}, 'Borders', 'Africa', 'Easy', 0), ({x}, 'Borders', 'Africa', 'Medium', 0), 
-    ({x}, 'Borders', 'Africa', 'Hard', 0), ({x}, 'Borders', 'America', 'Easy', 0), 
-    ({x}, 'Borders', 'America', 'Medium', 0), ({x}, 'Borders', 'America', 'Hard', 0)"""
+    req = f"""INSERT INTO progress VALUES ({x}, 'Flags', 'Europe', 'Easy', 0, ''), ({x}, 'Flags', 'Europe', 'Medium', 0, ''), 
+    ({x}, 'Flags', 'Europe', 'Hard', 0, ''), ({x}, 'Flags', 'Asia', 'Easy', 0, ''), ({x}, 'Flags', 'Asia', 'Medium', 0, ''), 
+    ({x}, 'Flags', 'Asia', 'Hard', 0, ''), ({x}, 'Flags', 'Africa', 'Easy', 0, ''), ({x}, 'Flags', 'Africa', 'Medium', 0, ''), 
+    ({x}, 'Flags', 'Africa', 'Hard', 0, ''), ({x}, 'Flags', 'America', 'Easy', 0, ''), 
+    ({x}, 'Flags', 'America', 'Medium', 0, ''), ({x}, 'Flags', 'America', 'Hard', 0, ''),  
+    ({x}, 'Borders', 'Europe', 'Easy', 0, ''), ({x}, 'Borders', 'Europe', 'Medium', 0, ''), 
+    ({x}, 'Borders', 'Europe', 'Hard', 0, ''), ({x}, 'Borders', 'Asia', 'Easy', 0, ''), ({x}, 'Borders', 'Asia', 'Medium', 0, ''), 
+    ({x}, 'Borders', 'Asia', 'Hard', 0, ''), ({x}, 'Borders', 'Africa', 'Easy', 0, ''), ({x}, 'Borders', 'Africa', 'Medium', 0, ''), 
+    ({x}, 'Borders', 'Africa', 'Hard', 0, ''), ({x}, 'Borders', 'America', 'Easy', 0, ''), 
+    ({x}, 'Borders', 'America', 'Medium', 0, ''), ({x}, 'Borders', 'America', 'Hard', 0, '')"""
     # executing the request
     cur.execute(req)
     # commiting the changes
     con.commit()
     con.close()
+    update.message.reply_text("Твои результаты полностью обнулены. Удачи!", reply_markup=help_markup)
 
 
-def save_results(update, context):
-    global user_result
-    # Подключение к БД
-    update.message.reply_text("Спасибо за оценку!", reply_markup=help_markup)
-    con = sqlite3.connect("Achievement.sqlite")
-    # Создание курсора
-    cur = con.cursor()
-    # Выполнение запроса и получение всех результатов
-    x = str(update.message.chat_id)
-    # print(x)
-    f_dir = context.user_data["game"].capitalize()
-    s_dir = context.user_data["continent"].capitalize()
-    t_dir = context.user_data["difficulty"].capitalize()
-    val = cur.execute(f"""SELECT points from progress
-    WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'""").fetchone()
-    request = f"""UPDATE progress
-    SET points = {val[0] + user_result}
-    WHERE id = '{x}' AND type = '{f_dir}' AND location = '{s_dir}' AND difficulty = '{t_dir}'"""
-    cur.execute(request)
-    con.commit()
-    con.close()
-    return ConversationHandler.END
-
-
-# ending of the dialog
-def restart(update, context):
-    update.message.reply_text('Классно поиграли, хочешь еще раз?', reply_markup=help_markup)
-    return ConversationHandler.END
-
-
-# showing user's results
 def info(update, context):
-    global LOGIN
-    if LOGIN:
+    try:
         # connecting to the database
         con = sqlite3.connect("Achievement.sqlite")
         cur = con.cursor()
@@ -871,25 +1106,21 @@ def info(update, context):
             s = f"{r[1]} | {r[2]} | {r[3]} | {r[4]}"
             ans.append(s)
         update.message.reply_text('\n'.join(ans), reply_markup=help_markup)
-    else:
-        # if user hasn't got any notes in the database
-        update.message.reply_text(
-            'Ты не зарегистрировался, поэтому я не слежу за твоими результатами. '
-            'Чтобы исправить это введи команду /login')
+    except Exception as ex:
+        update.message.reply_text("Извини, что-то пошло не так, но мы уже работаем над проблемой.",
+                                  reply_markup=help_markup)
+        print(ex)
 
 
-# providing bot's skills to the user
 def helper(update, context):
-    s1 = 'Я - географический бот. Провожу викторины оп географии. Чтобы пройти викторину, нажми /start'
-    s2 = 'Чтобы я запоминал твои результаты, введи /login'
-    s3 = 'Чтобы увидель свои результаты, введи /info'
+    s1 = 'Я - географический бот. Провожу викторины по географии. Чтобы пройти викторину, нажми /start'
+    s3 = 'Чтобы увидеть свои результаты, введи /info'
     s4 = 'Чтобы обнулить свои результаты, введи /reset'
     update.message.reply_text(
-        "\n".join([s1, s2, s3, s4]),
+        "\n".join([s1, s3, s4]),
         reply_markup=help_markup)
 
 
-# quiting the dialog with the user
 def stop(update, context):
     update.message.reply_text("Извините за беспокойство, до свидания", reply_markup=help_markup)
     return ConversationHandler.END
@@ -932,7 +1163,7 @@ if __name__ == '__main__':
 
     # Получаем из него диспетчер сообщений.
     dp = updater.dispatcher
-    print('Bot is waiting for you')
+    print('Bot is waiting for you...')
     # Создаём обработчик сообщений типа Filters.text
     # из описанной выше функции echo()
     # После регистрации обработчика в диспетчере
@@ -949,7 +1180,6 @@ if __name__ == '__main__':
             1: [MessageHandler(Filters.text & ~Filters.command, game_choice, pass_user_data=True)],
             2: [MessageHandler(Filters.text & ~Filters.command, continent_choice, pass_user_data=True)],
             3: [MessageHandler(Filters.text & ~Filters.command, diff_choice, pass_user_data=True)],
-            # borders cases
             "Borders1": [MessageHandler(Filters.text & ~Filters.command, border_quiz_1, pass_user_data=True)],
             "Borders2": [MessageHandler(Filters.text & ~Filters.command, border_quiz_2, pass_user_data=True)],
             "Borders3": [MessageHandler(Filters.text & ~Filters.command, border_quiz_3, pass_user_data=True)],
@@ -960,7 +1190,6 @@ if __name__ == '__main__':
             "Borders8": [MessageHandler(Filters.text & ~Filters.command, border_quiz_8, pass_user_data=True)],
             "Borders9": [MessageHandler(Filters.text & ~Filters.command, border_quiz_9, pass_user_data=True)],
             "Borders10": [MessageHandler(Filters.text & ~Filters.command, border_quiz_10, pass_user_data=True)],
-            # flags cases
             "Flags1": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_1, pass_user_data=True)],
             "Flags2": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_2, pass_user_data=True)],
             "Flags3": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_3, pass_user_data=True)],
@@ -971,29 +1200,17 @@ if __name__ == '__main__':
             "Flags8": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_8, pass_user_data=True)],
             "Flags9": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_9, pass_user_data=True)],
             "Flags10": [MessageHandler(Filters.text & ~Filters.command, flag_quiz_10, pass_user_data=True)],
-            # end of conversation
-            "restart": [MessageHandler(Filters.text & ~Filters.command, restart, pass_user_data=True)],
             "Checkpoint": [MessageHandler(Filters.text & ~Filters.command, check_results, pass_user_data=True)],
-            "SaveResults": [MessageHandler(Filters.text & ~Filters.command, save_results, pass_user_data=True)]
         },
         fallbacks=[MessageHandler(Filters.regex('/stop'), stop)]
     )
-    # activating dialog handler
     dp.add_handler(conv_handler)
-    # adding user's commands
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('help', helper))
-    dp.add_handler(CommandHandler('login', login))
-    dp.add_handler(CommandHandler('reset', login))
+    dp.add_handler(CommandHandler('reset', reset))
     dp.add_handler(CommandHandler('info', info))
-    # making message handler out of the dialog
     text_handler = MessageHandler(Filters.text, unexpected_message)
-    # activating handler
     dp.add_handler(text_handler)
-    # Регистрируем обработчик в диспетчере.
-    # Запускаем цикл приема и обработки сообщений.
     updater.start_polling()
-
-    # Ждём завершения приложения.
-    # (например, получения сигнала SIG_TERM при нажатии клавиш Ctrl+C)
     updater.idle()
+# https://t.me/geo_shmeo_test_bot
