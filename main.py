@@ -5,6 +5,7 @@ from telegram.ext import CommandHandler
 from telegram import ReplyKeyboardMarkup
 from telegram import ReplyKeyboardRemove
 from telegram.ext import ConversationHandler
+from env import TOKEN
 import os
 import sqlite3
 import sys
@@ -13,7 +14,6 @@ from borders_encyclopedia import borders_encyclopedia
 
 # global variables to keep user's data
 LOGIN = False
-TOKEN = '1756966385:AAGLGFkAqqHX2eUf-cu5mceG6xPYjsHCREI'
 
 
 # the beginning of the quiz
